@@ -1,5 +1,10 @@
 @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono");
 
+.matrix3d {
+  animation: matrix_3d_rotation linear 16s infinite;
+  scale: 190vh;
+}
+
 .class {
   text-align: center;
   width: fit-content;
@@ -44,7 +49,6 @@ h4 {
 
 html,
 body {
-  background-color: #110b1e;
   animation: rainbow-bg 2.5s linear;
   animation-iteration-count: infinite;
   overflow: hidden;
@@ -136,5 +140,14 @@ body {
   }
   91% {
     color: rgb(255, 0, 127);
+  }
+}
+
+@keyframes matrix_3d_rotation {
+  from {
+    transform: rotate3d(1, 1, 1, 0deg);
+  }
+  to {
+    transform: rotate3d(1, 1, 1, 360deg);
   }
 }
