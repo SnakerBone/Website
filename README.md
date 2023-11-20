@@ -1,3 +1,3 @@
-# Snaker Website
+# Website
 
 https://snaker.xyz
