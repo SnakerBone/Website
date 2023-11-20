@@ -64,23 +64,23 @@ body {
   width: fit-content;
 }
 
-/* About Page */
+/* About Page & Projects Page */
 
-.about-body {
+.info-body {
   display: grid;
   justify-content: center;
   align-items: center;
 }
 
-.about-header {
+.info-header {
   text-align: center;
 }
 
-.about-main {
+.info-main {
   text-align: center;
 }
 
-.about-section {
+.info-section {
   display: table;
   place-items: center;
 }
@@ -93,7 +93,6 @@ body {
 }
 
 @keyframes rainbow-bg {
-
   100%,
   0% {
     background-color: rgb(255, 0, 0);
@@ -145,7 +144,6 @@ body {
 }
 
 @keyframes rainbow {
-
   100%,
   0% {
     color: rgb(255, 0, 0);
