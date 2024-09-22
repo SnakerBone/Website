@@ -1,0 +1,121 @@
+@import url(https://db.onlinewebfonts.com/c/ab890d5371f7de309eb49e38e0aaedce?family=Helvetica+Neue+LT+Std+83+Heavy+Extended);
+@import url(https://db.onlinewebfonts.com/c/d6875b68e69e10509fa16e2e276c5f59?family=Helvetica+Neue+LT+Std+53+Extended);
+@import url(https://db.onlinewebfonts.com/c/b61c223487613e7dc2a8144b7239f4b1?family=Helvetica+Neue+LT+Std+43+Light+Extended);
+
+.text-center 
+{
+  text-align: center;
+  color: white;
+}
+
+.dark 
+{
+  background-color: #000;
+}
+
+.quart 
+{
+  width: 100%;
+  height: 2px;
+  background-color: white;
+  background: linear-gradient(45deg, rgba(255,0,177,1) 0%, rgba(153,0,215,1) 20%, rgba(255,255,255,1) 40%, rgba(153,0,215,1) 60%, rgba(255,0,177,1) 80%, rgba(255,255,255,1) 100%);
+}
+
+.neue-hxt
+{
+  font-family: 'Helvetica Neue LT Std 83 Heavy Extended';
+}
+
+.neue-xt
+{
+  font-family: 'Helvetica Neue LT Std 53 Extended';
+}
+
+.neue-lxt
+{
+  font-family: 'Helvetica Neue LT Std 43 Light Extended';
+}
+
+.neue-std 
+{
+  font-family: 'Neue';
+}
+
+.grd-txt 
+{
+  background: -webkit-linear-gradient(45deg, rgba(255,0,177,1) 0%, rgba(153,0,215,1) 20%, rgba(255,255,255,1) 40%, rgba(153,0,215,1) 60%, rgba(255,0,177,1) 80%, rgba(255,255,255,1) 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.grd-border 
+{
+  border: 4px solid transparent;
+  border-radius: 20px;
+  background:
+    linear-gradient(0deg , black, black),
+    linear-gradient(45deg, #9900D7 , #FF0088);
+  background-clip: padding-box, border-box;
+  background-origin: padding-box, border-box;
+}
+
+.title 
+{
+  margin-top: calc(100% - 70%);
+  text-align: center;
+}
+
+.footer 
+{
+  width: 100%;
+  position: relative;
+  bottom: 0;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.footer-link 
+{
+  color: #efefefa1;
+}
+
+.info-collapse-title 
+{
+  background-color: #000;
+  color: white;
+  cursor: pointer;
+  width: 100%;
+  border: none;
+  text-align: center;
+  outline: none;
+  padding: 0px;
+  margin: 0px;
+}
+
+.info-active, .info-collapse-title:hover 
+{
+  background-color: #1a1a1a;
+}
+
+.info-collapse-holder 
+{
+  padding: 0 18px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+  background-color: #000;
+}
+
+.info-symbol-suffix 
+{
+  color: #fff;
+  font-size: xx-large;
+  margin-left: 5px;
+  margin-right: 5px;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  padding: 0px;
+}
