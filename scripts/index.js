@@ -64,7 +64,7 @@ function loadSnakerTexture(path)
     glSnaker.texImage2D(glSnaker.TEXTURE_2D, 0, glSnaker.RGBA, 1, 1, 0, glSnaker.RGBA, glSnaker.UNSIGNED_BYTE, glPixels);
 
     const imageElement = new Image();
-    imageElement.src = `../include/img/${path}`;
+    imageElement.src = `../images/${path}`;
     imageElement.onload = () =>
     {
         glSnaker.bindTexture(glSnaker.TEXTURE_2D, glTexture);
@@ -119,7 +119,7 @@ async function main()
         glSnaker.activeTexture(glSnaker.TEXTURE0);
         glSnaker.bindTexture(glSnaker.TEXTURE_2D, glImageTexture);
         
-        //glSnaker.pixelStorei(glSnaker.UNPACK_FLIP_Y_WEBGL, true);
+        glSnaker.pixelStorei(glSnaker.UNPACK_FLIP_Y_WEBGL, true);
 
         glSnaker.uniform1i(glUniformImageTexture, 0);
         glSnaker.uniform1f(glUniformTime, time);
