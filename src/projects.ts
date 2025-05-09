@@ -23,15 +23,7 @@ class Project
 
     public async data(): Promise<any>
     {
-        const init: RequestInit = 
-        {
-            "headers": {
-                'Authorization': `token ${atob('Z2hwX3I0ZlRxVWZvQ3JjY2czcm0wNFVndGpRZFhoZWVoVzFiekp2Nw==')}`,
-                'Accept': 'application/vnd.github+json',
-                'X-GitHub-Api-Version': '2022-11-28'
-            }
-        };
-        const response: Response = await fetch(this.url(), init);
+        const response: Response = await fetch(this.url());
         
         return response.json();
     }
@@ -49,7 +41,7 @@ class Project
         const date: Date = new Date(data.updated_at);
         const formattedDate: string = formatDate(date);
 
-        CACHE.set(this.id, formattedDate, 10);
+        CACHE.set(this.id, formattedDate, 60);
 
         return formattedDate;
     }
