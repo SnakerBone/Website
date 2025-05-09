@@ -1,168 +1,69 @@
-const cacheTTL = (24 * 60 * 60 * 1000) / 2;
-let atomicFetchLock = false;
-
-document.addEventListener("DOMContentLoaded", () =>
-{
-    addProjects();
-});
-
-function addProjects() 
-{
-    addProject('ByteSnek', 'PsychX');
-    addProject('ByteSnek', 'SnakerLib');
-    addProject('ByteSnek', 'JSnake');
-    addProject('ByteSnek', 'SnakeCrypt');
-}
-
-function addProject(vendor, name) 
-{
-    const timestampKey = `${vendor.toLowerCase()}.${name.toLowerCase()}.timestamp`;
-    const timestampElement = document.getElementById(`${name.toLowerCase()}-timestamp`);
-    
-    if (!timestampElement) {
-        console.warn(`Could not find timestamp element ${name.toLowerCase()}-timestamp. Ignoring!`);
-        return;
-    }
-
-    if (!localStorage.getItem(timestampKey)) {
-        fetchTimestamp(vendor, name);
-    }
-
-    timestampElement.textContent = localStorage.getItem(timestampKey);
-}
-
-function fetchTimestamp(vendor, name) 
-{
-    const url = `https://api.github.com/repos/${vendor}/${name}`;
-    const auth = atob('Z2hwX2tNcVlSYnlpdFlFS2hSTDVEY2lpaFBjQlhDYkpvYjNPWlBHQw==');
-    const errors = [];
-    const request = { 
-        headers: { 
-            'Authorization': `token ${auth}` 
-        } 
-    };
-
-    if (atomicFetchLock === true) {
-        return;
-    } else {
-        lock();
-    }
-
-    fetch(url, request)
-        .then(response => response.json())
-        .then(handleJson)
-        .catch(errors.push)
-        .finally(unlock);
-}
-
-function handleJson(json) 
-{
-    const lastUpdatedDate = new Date(json.updated_at);
-    const fullName = json.full_name;
-    const key = fullName.toLowerCase().replace('/', '.') + '.timestamp';
-
-    localStorage.setItem(key, getDate(lastUpdatedDate));
-}
-
-async function lock() 
-{
-    if (atomicFetchLock === true) {
-        return;
-    }
-
-    const promise = new Promise(exec => {
-        atomicFetchLock = true;
-        exec();
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
-
-    await promise;
-}
-
-async function unlock() 
-{
-    if (atomicFetchLock === false) {
-        return;
+};
+import { setDarkMode, setNavbar, setHeading, LocalCache, formatDate } from "./api.js";
+const GITHUB_API_REPOS_URL = 'https://api.github.com/repos';
+const CACHE = new LocalCache();
+class Project {
+    constructor(owner, name) {
+        this.owner = owner;
+        this.name = name;
+        this.id = name.toLowerCase();
     }
-
-    const promise = new Promise(exec => {
-        atomicFetchLock = false;
-        exec();
+    url() {
+        return `${GITHUB_API_REPOS_URL}/${this.owner}/${this.name}`;
+    }
+    data() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const init = {
+                "headers": {
+                    'Authorization': `token ${atob('Z2hwX3I0ZlRxVWZvQ3JjY2czcm0wNFVndGpRZFhoZWVoVzFiekp2Nw==')}`,
+                    'Accept': 'application/vnd.github+json',
+                    'X-GitHub-Api-Version': '2022-11-28'
+                }
+            };
+            const response = yield fetch(this.url(), init);
+            return response.json();
+        });
+    }
+    lastUpdated() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const cachedDate = CACHE.get(this.id);
+            if (cachedDate) {
+                return cachedDate;
+            }
+            const data = yield this.data();
+            const date = new Date(data.updated_at);
+            const formattedDate = formatDate(date);
+            CACHE.set(this.id, formattedDate, 10);
+            return formattedDate;
+        });
+    }
+}
+const PROJECTS = [
+    new Project('ByteSnek', 'PsychX'),
+    new Project('ByteSnek', 'SnakerLib'),
+    new Project('ByteSnek', 'JSnake'),
+    new Project('ByteSnek', 'SnakeCrypt')
+];
+setDarkMode();
+setNavbar();
+setHeading('Projects', 4, 'main');
+setTimestamps();
+function setTimestamps() {
+    return __awaiter(this, void 0, void 0, function* () {
+        for (let i = 0; i < PROJECTS.length; i++) {
+            const project = PROJECTS[i];
+            const timestampId = `${project.id}-timestamp`;
+            const lastUpdated = yield project.lastUpdated();
+            const timestamp = document.getElementById(timestampId);
+            timestamp.textContent = lastUpdated;
+        }
     });
-
-    await promise;
-}
-
-function invalidateCache() 
-{
-    if (atomicFetchLock === true) {
-        atomicFetchLock = false;
-    }
-
-    if (localStorage.length != 0) {
-        localStorage.clear();
-    }
-
-    addProjects();
-}
-
-setTimeout(() =>
-{
-    invalidateCache();
-    setInterval(invalidateCache, cacheTTL);
-
-}, cacheTTL);
-
-function getDate(date)
-{
-    return getDateString(date.getUTCFullYear(), date.getMonth(), date.getDay());
-}
-
-function getDateString(year, month, day)
-{
-    return getSmallMonthName(month) + ' ' + day + ' ' + (new Date().getUTCFullYear() != year ? '' : year);
-}
-
-function getSmallMonthName(index)
-{
-    switch (index) {
-        case 0: {
-            return "Jan";
-        }
-        case 1: {
-            return "Feb";
-        }
-        case 2: {
-            return "Mar";
-        }
-        case 3: {
-            return "Apr";
-        }
-        case 4: {
-            return "May";
-        }
-        case 5: {
-            return "Jun";
-        }
-        case 6: {
-            return "Jul";
-        }
-        case 7: {
-            return "Aug";
-        }
-        case 8: {
-            return "Sep";
-        }
-        case 9: {
-            return "Oct";
-        }
-        case 10: {
-            return "Nov";
-        }
-        case 11: {
-            return "Dec";
-        }
-        default: {
-            return "Unknown";
-        }
-    }
 }

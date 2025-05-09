@@ -1,135 +1,105 @@
-const snaker = document.getElementById('glSnaker');
-const glSnaker = snaker.getContext('webgl');
-
-function resizeSnaker()
-{
-    snaker.width = 512;
-    snaker.height = 512;
-    glSnaker.viewport(0, 0, snaker.width, snaker.height);
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+import { setDarkMode, setNavbar } from "./api.js";
+setDarkMode();
+setNavbar();
+renderSnaker();
+function resize(canvas, gl) {
+    canvas.width = 512;
+    canvas.height = 512;
+    gl.viewport(0, 0, canvas.width, canvas.height);
 }
-
-window.addEventListener('resize', resizeSnaker);
-
-resizeSnaker();
-
-async function loadShaderSource(path)
-{
-    const response = await fetch(`../shaders/${path}`);
-
-    return await response.text();
+function loadTexture(gl, path) {
+    const texture = gl.createTexture();
+    const pixels = new Uint8Array([0, 0, 255, 255]);
+    const image = new Image();
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+    image.src = `../images/${path}`;
+    image.onload = () => {
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    };
+    return texture;
 }
-
-async function initializeShaderProgram(gl)
-{
-    const vertexSource = await loadShaderSource('snaker.vert');
-    const fragmentSource = await loadShaderSource('snaker.frag');
-
-    const vertexShader = loadRgbShader(gl.VERTEX_SHADER, vertexSource);
-    const fragmentShader = loadRgbShader(gl.FRAGMENT_SHADER, fragmentSource);
-
-    const glShaderProgram = gl.createProgram();
-    gl.attachShader(glShaderProgram, vertexShader);
-    gl.attachShader(glShaderProgram, fragmentShader);
-    gl.linkProgram(glShaderProgram);
-
-    if (!gl.getProgramParameter(glShaderProgram, gl.LINK_STATUS)) {
-        console.error('Unable to initialize the shader program: ' + gl.getProgramInfoLog(glShaderProgram));
-        return null;
+function loadShader(gl, type, source) {
+    const shader = gl.createShader(type);
+    if (!shader) {
+        const shaderName = {
+            0x8B31: 'vertex',
+            0x8B30: 'fragment'
+        };
+        throw Error(`Could not create ${shaderName[type]} shader`);
     }
-
-    return glShaderProgram;
-}
-
-function loadRgbShader(type, source)
-{
-    const shader = glSnaker.createShader(type);
-    glSnaker.shaderSource(shader, source);
-    glSnaker.compileShader(shader);
-
-    if (!glSnaker.getShaderParameter(shader, glSnaker.COMPILE_STATUS)) {
-        console.error('An error occurred compiling the shaders: ' + glSnaker.getShaderInfoLog(shader));
-        glSnaker.deleteShader(shader);
-        return null;
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        gl.deleteShader(shader);
+        throw Error(`Could not compile shader: ${gl.getShaderInfoLog(shader)}`);
     }
-
     return shader;
 }
-
-function loadSnakerTexture(path)
-{
-    const glTexture = glSnaker.createTexture();
-    glSnaker.bindTexture(glSnaker.TEXTURE_2D, glTexture);
-
-    const glPixels = new Uint8Array([0, 0, 255, 255]);
-    glSnaker.texImage2D(glSnaker.TEXTURE_2D, 0, glSnaker.RGBA, 1, 1, 0, glSnaker.RGBA, glSnaker.UNSIGNED_BYTE, glPixels);
-
-    const imageElement = new Image();
-    imageElement.src = `../images/${path}`;
-    imageElement.onload = () =>
-    {
-        glSnaker.bindTexture(glSnaker.TEXTURE_2D, glTexture);
-        glSnaker.texImage2D(glSnaker.TEXTURE_2D, 0, glSnaker.RGBA, glSnaker.RGBA, glSnaker.UNSIGNED_BYTE, imageElement);
-
-        glSnaker.texParameteri(glSnaker.TEXTURE_2D, glSnaker.TEXTURE_WRAP_S, glSnaker.CLAMP_TO_EDGE);
-        glSnaker.texParameteri(glSnaker.TEXTURE_2D, glSnaker.TEXTURE_WRAP_T, glSnaker.CLAMP_TO_EDGE);
-
-        glSnaker.texParameteri(glSnaker.TEXTURE_2D, glSnaker.TEXTURE_MIN_FILTER, glSnaker.LINEAR);
-        glSnaker.texParameteri(glSnaker.TEXTURE_2D, glSnaker.TEXTURE_MAG_FILTER, glSnaker.LINEAR);
-    };
-
-    return glTexture;
+function loadSource(path) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const response = yield fetch(`../shaders/${path}`);
+        return yield response.text();
+    });
 }
-
-async function main()
-{
-    const glShaderProgram = await initializeShaderProgram(glSnaker);
-
-    if (!glShaderProgram) { 
-        return; 
-    }
-
-    const glAttribPosition = glSnaker.getAttribLocation(glShaderProgram, 'Position');
-    const glUniformTime = glSnaker.getUniformLocation(glShaderProgram, 'Time');
-    const glUniformImageTexture = glSnaker.getUniformLocation(glShaderProgram, 'ImageTexture');
-
-    const glImageTexture = loadSnakerTexture('snaker.png', null);
-    const glBuffer = glSnaker.createBuffer();
-
-    const verticies = [
-        -1.0, 1.0,
-        1.0, 1.0,
-        -1.0, -1.0,
-        1.0, -1.0,
-    ];
-
-    glSnaker.bindBuffer(glSnaker.ARRAY_BUFFER, glBuffer);
-    glSnaker.bufferData(glSnaker.ARRAY_BUFFER, new Float32Array(verticies), glSnaker.STATIC_DRAW);
-
-    glSnaker.enableVertexAttribArray(glAttribPosition);
-    glSnaker.vertexAttribPointer(glAttribPosition, 2, glSnaker.FLOAT, false, 0, 0);
-
-    function render(time)
-    {
-        time *= 0.001;
-
-        glSnaker.clear(glSnaker.COLOR_BUFFER_BIT);
-
-        glSnaker.useProgram(glShaderProgram);
-        
-        glSnaker.activeTexture(glSnaker.TEXTURE0);
-        glSnaker.bindTexture(glSnaker.TEXTURE_2D, glImageTexture);
-        
-        glSnaker.pixelStorei(glSnaker.UNPACK_FLIP_Y_WEBGL, true);
-
-        glSnaker.uniform1i(glUniformImageTexture, 0);
-        glSnaker.uniform1f(glUniformTime, time);
-        
-        glSnaker.drawArrays(glSnaker.TRIANGLE_STRIP, 0, 4);
-
+function createProgram(gl) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const vertexSource = yield loadSource('snaker.vert');
+        const fragmentSource = yield loadSource('snaker.frag');
+        const vertexShader = loadShader(gl, gl.VERTEX_SHADER, vertexSource);
+        const fragmentShader = loadShader(gl, gl.FRAGMENT_SHADER, fragmentSource);
+        const program = gl.createProgram();
+        gl.attachShader(program, vertexShader);
+        gl.attachShader(program, fragmentShader);
+        gl.linkProgram(program);
+        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+            throw Error(`Could not initialize shader program: ${gl.getProgramInfoLog(program)}`);
+        }
+        return program;
+    });
+}
+function renderSnaker() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const canvas = document.getElementById('glSnaker');
+        const gl = canvas.getContext('webgl');
+        const program = yield createProgram(gl);
+        const position = gl.getAttribLocation(program, 'Position');
+        const time = gl.getUniformLocation(program, 'Time');
+        const texture = gl.getUniformLocation(program, 'ImageTexture');
+        const image = loadTexture(gl, 'snaker.png');
+        const buffer = gl.createBuffer();
+        const verticies = [-1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0,];
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(verticies), gl.STATIC_DRAW);
+        gl.enableVertexAttribArray(position);
+        gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+        function render(animTime) {
+            animTime *= 0.001;
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.useProgram(program);
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, image);
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+            gl.uniform1i(texture, 0);
+            gl.uniform1f(time, animTime);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            requestAnimationFrame(render);
+        }
         requestAnimationFrame(render);
-    }
-
-    requestAnimationFrame(render);
+        resize(canvas, gl);
+    });
 }
-
-main();
