@@ -1,12 +1,13 @@
 precision mediump float;
 
-uniform sampler2D SnakerTexture;
+uniform sampler2D ImageTexture;
 uniform float Time;
+uniform vec2 Resolution;
 
 void main() 
 {
-    vec2 uv = gl_FragCoord.xy / vec2(512.0, 512.0);
-    vec4 textureColour = texture2D(SnakerTexture, uv);
+    vec2 uv = gl_FragCoord.xy / Resolution;
+    vec4 textureColour = texture2D(ImageTexture, uv);
 
     float r = 0.5 + 0.5 * sin(Time + uv.x * 5.0);
     float g = 0.5 + 0.5 * sin(Time + uv.y * 5.0);
