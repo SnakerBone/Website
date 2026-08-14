@@ -1,3 +1,14 @@
+import { GLShaderRenderer } from "./glrenderer.js";
+export function createSnakerRenderShard() {
+    const canvasId = 'glSnaker';
+    const canvas = document.getElementById(canvasId);
+    const options = {
+        vertexShaderPath: '../shaders/rgb_pulse.vsh',
+        fragmentShaderPath: '../shaders/rgb_pulse.fsh',
+        imagePath: '../img/logo.png',
+    };
+    return new GLShaderRenderer(canvas, options);
+}
 export class LocalCache {
     constructor(prefix = 'cache_') {
         this.prefix = prefix;
@@ -140,12 +151,23 @@ export function formatDate(date) {
     const yearsDiff = now.getFullYear() - pastDate.getFullYear();
     const monthsDiff = now.getMonth() - pastDate.getMonth() + (12 * yearsDiff);
     if (monthsDiff < 1) {
-        return "less than a month ago";
+        return 'less than a month ago';
     }
-    else if (monthsDiff === 1) {
-        return "1 month ago";
+    else if (monthsDiff < 12) {
+        if (monthsDiff === 1) {
+            return 'a month ago';
+        }
+        else {
+            return `${monthsDiff} months ago`;
+        }
     }
     else {
-        return `${monthsDiff} months ago`;
+        const yearsAgo = Math.floor(monthsDiff / 12);
+        if (yearsAgo === 1) {
+            return 'a year ago';
+        }
+        else {
+            return `${yearsAgo} years ago`;
+        }
     }
 }

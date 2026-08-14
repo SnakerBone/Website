@@ -1,8 +1,24 @@
-type CacheEntry<T> = 
+import { GLShaderRenderer, GLShaderRendererOptions } from "./glrenderer.js";
+
+type CacheEntry<T> =
+    {
+        value: T;
+        expiration: number | null;
+    };
+
+export function createSnakerRenderShard(): GLShaderRenderer
 {
-    value: T;
-    expiration: number | null;
-};
+    const canvasId: string = 'glSnaker';
+    const canvas: HTMLCanvasElement = document.getElementById(canvasId) as HTMLCanvasElement;
+
+    const options: GLShaderRendererOptions = {
+        vertexShaderPath: '../shaders/rgb_pulse.vsh',
+        fragmentShaderPath: '../shaders/rgb_pulse.fsh',
+        imagePath: '../img/logo.png',
+    }
+
+    return new GLShaderRenderer(canvas, options);
+}
 
 export class LocalCache
 {
@@ -27,15 +43,16 @@ export class LocalCache
     {
         const raw: string | null = localStorage.getItem(this.prefix + key);
 
-        if (!raw) 
+        if (!raw)
         {
             return null;
         }
 
-        try {
+        try
+        {
             const entry: CacheEntry<T> = JSON.parse(raw);
 
-            if (entry.expiration && Date.now() > entry.expiration) 
+            if (entry.expiration && Date.now() > entry.expiration)
             {
                 localStorage.removeItem(this.prefix + key);
 
@@ -43,7 +60,8 @@ export class LocalCache
             }
 
             return entry.value;
-        } catch {
+        } catch
+        {
             return null;
         }
     }
@@ -57,20 +75,21 @@ export class LocalCache
     {
         Object.keys(localStorage).forEach(key =>
         {
-            if (key.startsWith(this.prefix)) {
+            if (key.startsWith(this.prefix))
+            {
                 localStorage.removeItem(key);
             }
         });
     }
 }
 
-class NavbarLink 
+class NavbarLink
 {
     private name: string;
     private id: string;
     private href: string;
 
-    constructor(name: string, id: string, href: string) 
+    constructor(name: string, id: string, href: string)
     {
         this.name = name;
         this.id = id;
@@ -107,7 +126,8 @@ export function setHeading(title: string, marginSize: number, parentId: string):
     const margin: string = `m-${marginSize}`;
     let parent: HTMLElement | null = document.getElementById(parentId);
 
-    if (!parent) {
+    if (!parent)
+    {
         parent = getBody();
     }
 
@@ -157,7 +177,8 @@ export function setNavbar(): HTMLElement
     navbarInner.appendChild(navbarBrand);
     navbarInner.appendChild(navbarNav);
 
-    for (let i = 0; i < NAVBAR_LINKS.length; i++) {
+    for (let i = 0; i < NAVBAR_LINKS.length; i++)
+    {
         const navbarLink: NavbarLink = NAVBAR_LINKS[i];
         const navLink: HTMLAnchorElement = setNavLink(navbarLink.getName(), navbarLink.getId(), navbarLink.getHref());
 
@@ -187,7 +208,8 @@ function setNavLink(name: string, id: string, href: string): HTMLAnchorElement
     navLink.classList.add('inline');
     navLink.setAttribute('href', active ? '' : href);
 
-    if (active) {
+    if (active)
+    {
         navLink.classList.add('active');
     }
 
@@ -207,7 +229,7 @@ export function getCurrentFileName(): string
     return window.location.pathname.substring(1).replace('.html', '').toLowerCase();
 }
 
-export function getBody(): HTMLElement 
+export function getBody(): HTMLElement
 {
     return document.body;
 }
@@ -220,11 +242,32 @@ export function formatDate(date: Date): string
     const yearsDiff: number = now.getFullYear() - pastDate.getFullYear();
     const monthsDiff: number = now.getMonth() - pastDate.getMonth() + (12 * yearsDiff);
 
-    if (monthsDiff < 1) {
-        return "less than a month ago";
-    } else if (monthsDiff === 1) {
-        return "1 month ago";
-    } else {
-        return `${monthsDiff} months ago`;
+    if (monthsDiff < 1)
+    {
+        return 'less than a month ago';
+    }
+    else if (monthsDiff < 12)
+    {
+        if (monthsDiff === 1)
+        {
+            return 'a month ago';
+        }
+        else
+        {
+            return `${monthsDiff} months ago`;
+        }
+    }
+    else
+    {
+        const yearsAgo: number = Math.floor(monthsDiff / 12);
+
+        if (yearsAgo === 1)
+        {
+            return 'a year ago';
+        }
+        else
+        {
+            return `${yearsAgo} years ago`;
+        }
     }
 }

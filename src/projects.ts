@@ -8,12 +8,14 @@ class Project
     public owner: string;
     public name: string;
     public id: string;
+    private archived: boolean;
 
-    public constructor(owner: string, name: string) 
+    public constructor(owner: string, name: string, archived?: boolean) 
     {
         this.owner = owner;
         this.name = name;
         this.id = name.toLowerCase();
+        this.archived = archived ? true : false;
     }
 
     public url(): string
@@ -45,12 +47,15 @@ class Project
 
         return formattedDate;
     }
+
+    public isArchived(): boolean 
+    {
+        return this.archived;
+    }
 }
 
 const PROJECTS: Project[] =
 [
-    new Project('ByteSnek', 'PsychX'),
-    new Project('ByteSnek', 'SnakerLib'),
     new Project('ByteSnek', 'JSnake'),
     new Project('ByteSnek', 'SnakeCrypt')
 ];
